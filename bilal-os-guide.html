@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bilal OS — دليل البناء</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #080d14;
+    --bg2:       #0d1520;
+    --bg3:       #101b28;
+    --surface:   #142030;
+    --border:    #1e3048;
+    --glow:      #00d4ff;
+    --glow2:     #0088cc;
+    --text:      #c8dce8;
+    --muted:     #607888;
+    --accent:    #ff7b3a;
+    --green:     #22d478;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'IBM Plex Sans Arabic', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── ANIMATED BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 800px 500px at 80% 10%, rgba(0,212,255,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 600px 400px at 10% 80%, rgba(0,136,204,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 80px 40px 60px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(0,212,255,0.03) 0%, transparent 100%);
+  }
+
+  .logo-ascii {
+    font-family: var(--mono);
+    font-size: clamp(7px, 1.4vw, 13px);
+    line-height: 1.2;
+    color: var(--glow);
+    text-shadow: 0 0 20px rgba(0,212,255,0.4);
+    letter-spacing: 0;
+    white-space: pre;
+    display: inline-block;
+    margin-bottom: 28px;
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { text-shadow: 0 0 20px rgba(0,212,255,0.3); }
+    50%       { text-shadow: 0 0 40px rgba(0,212,255,0.7), 0 0 80px rgba(0,212,255,0.2); }
+  }
+
+  .tagline {
+    font-size: 13px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 40px;
+  }
+
+  .badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+    letter-spacing: 1px;
+  }
+  .badge-blue   { color: var(--glow);   border-color: rgba(0,212,255,0.3);  background: rgba(0,212,255,0.06); }
+  .badge-green  { color: var(--green);  border-color: rgba(34,212,120,0.3); background: rgba(34,212,120,0.06); }
+  .badge-orange { color: var(--accent); border-color: rgba(255,123,58,0.3); background: rgba(255,123,58,0.06); }
+
+  /* ── LAYOUT ── */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-top: 60px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--glow);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* ── STEPS ── */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 0 20px;
+    position: relative;
+  }
+
+  .step:not(:last-child) .step-line {
+    position: absolute;
+    right: 35px;
+    top: 48px;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, var(--border), transparent);
+  }
+
+  .step-num {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--glow);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-body {
+    padding: 10px 0 40px;
+  }
+
+  .step-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .step-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+  }
+
+  .code-lang {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .code-dots { display: flex; gap: 6px; }
+  .code-dot  { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+
+  pre {
+    padding: 16px 20px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    color: #a8c0d0;
+    overflow-x: auto;
+    direction: ltr;
+    text-align: left;
+  }
+
+  pre .c  { color: var(--muted); }
+  pre .k  { color: var(--glow); }
+  pre .s  { color: var(--green); }
+  pre .v  { color: var(--accent); }
+  pre .cmd{ color: #c084fc; }
+
+  /* ── INFO CARDS ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: rgba(0,212,255,0.3); }
+
+  .card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(0,212,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .card-val {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--glow);
+    margin-bottom: 4px;
+  }
+
+  .card-desc {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── WARNING / NOTE ── */
+  .note {
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin: 16px 0;
+    border: 1px solid;
+  }
+
+  .note-warn  { background: rgba(255,123,58,0.06); border-color: rgba(255,123,58,0.2); color: #ffc098; }
+  .note-info  { background: rgba(0,212,255,0.04);  border-color: rgba(0,212,255,0.15); color: var(--text); }
+  .note-ok    { background: rgba(34,212,120,0.05); border-color: rgba(34,212,120,0.2); color: #9effd0; }
+
+  .note-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── PACKAGE LIST ── */
+  .pkg-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .pkg {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(0,212,255,0.15);
+    color: var(--glow);
+  }
+
+  /* ── SPECS TABLE ── */
+  .specs {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .specs tr { border-bottom: 1px solid var(--border); }
+  .specs tr:last-child { border-bottom: none; }
+  .specs td { padding: 10px 16px; }
+  .specs td:first-child { color: var(--muted); font-size: 12px; width: 35%; }
+  .specs td:last-child  { color: #fff; font-family: var(--mono); }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 40px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-ascii">  ██████╗ ██╗██╗      █████╗ ██╗       ██████╗ ███████╗
+  ██╔══██╗██║██║     ██╔══██╗██║      ██╔═══██╗██╔════╝
+  ██████╔╝██║██║     ███████║██║      ██║   ██║███████╗
+  ██╔══██╗██║██║     ██╔══██║██║      ██║   ██║╚════██║
+  ██████╔╝██║███████╗██║  ██║███████╗ ╚██████╔╝███████║
+  ╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝  ╚═════╝ ╚══════╝</div>
+
+  <p class="tagline">Horizon Edition · v1.0 · Debian-Based Linux</p>
+
+  <div class="badges">
+    <span class="badge badge-blue">Debian 12 Bookworm</span>
+    <span class="badge badge-green">XFCE Desktop</span>
+    <span class="badge badge-blue">x86_64</span>
+    <span class="badge badge-orange">Live ISO + Install</span>
+    <span class="badge badge-green">UEFI + BIOS</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ── SPECS ── -->
+  <div class="section">
+    <div class="section-title">مواصفات النظام</div>
+    <div class="card">
+      <table class="specs">
+        <tr><td>اسم النظام</td>     <td>Bilal OS 1.0 (Horizon)</td></tr>
+        <tr><td>القاعدة</td>        <td>Debian GNU/Linux 12 (bookworm)</td></tr>
+        <tr><td>المعمارية</td>       <td>x86_64 (amd64)</td></tr>
+        <tr><td>بيئة سطح المكتب</td><td>XFCE 4.x</td></tr>
+        <tr><td>نظام الإقلاع</td>   <td>GRUB 2 (UEFI GPT + BIOS MBR)</td></tr>
+        <tr><td>نظام الملفات</td>   <td>SquashFS (xz) — Live / ext4 — Install</td></tr>
+        <tr><td>المستخدم الافتراضي</td><td>bilal / bilal123</td></tr>
+        <tr><td>اللغة الافتراضية</td><td>ar_SA.UTF-8</td></tr>
+        <tr><td>المنطقة الزمنية</td> <td>Asia/Riyadh</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── REQUIREMENTS ── -->
+  <div class="section">
+    <div class="section-title">متطلبات البناء</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">💻</div>
+        <div class="card-title">نظام التشغيل</div>
+        <div class="card-val">Ubuntu / Debian</div>
+        <div class="card-desc">مضيف لينيكس مبني على ديبيان لتشغيل debootstrap</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">💾</div>
+        <div class="card-title">مساحة القرص</div>
+        <div class="card-val">≥ 15 GB</div>
+        <div class="card-desc">10GB للبناء + 5GB للـ ISO النهائي</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <div class="card-title">ذاكرة RAM</div>
+        <div class="card-val">≥ 4 GB</div>
+        <div class="card-desc">8GB موصى به لعمليات SquashFS</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <div class="card-title">الإنترنت</div>
+        <div class="card-val">مطلوب</div>
+        <div class="card-desc">لتحميل حزم Debian أثناء debootstrap</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⏱️</div>
+        <div class="card-title">وقت البناء</div>
+        <div class="card-val">30–90 دقيقة</div>
+        <div class="card-desc">حسب سرعة الاتصال والمعالج</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔑</div>
+        <div class="card-title">الصلاحيات</div>
+        <div class="card-val">Root / sudo</div>
+        <div class="card-desc">مطلوب لـ debootstrap وـ chroot</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEPS ── -->
+  <div class="section">
+    <div class="section-title">خطوات البناء</div>
+
+    <div class="steps">
+
+      <!-- STEP 1 -->
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="step-title">تثبيت الأدوات المطلوبة</div>
+          <div class="step-desc">تحتاج إلى تثبيت أدوات البناء على جهاز المضيف (Ubuntu/Debian)</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash</span>
+              <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+            </div>
+<pre>
+<span class="c"># تحديث القائمة وتثبيت أدوات البناء</span>
+<span class="cmd">sudo apt-get update</span>
+<span class="cmd">sudo apt-get install -y</span> <span class="s">\
+    debootstrap live-build xorriso squashfs-tools \
+    grub-efi-amd64-bin grub-pc-bin syslinux \
+    syslinux-common isolinux genisoimage dosfstools</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="step-title">تحميل سكريبت البناء</div>
+          <div class="step-desc">احفظ ملف <strong>bilal-os-build.sh</strong> في مجلد العمل وامنحه صلاحية التنفيذ</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash</span>
+              <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+            </div>
+<pre>
+<span class="c"># انسخ السكريبت إلى مجلد العمل</span>
+<span class="cmd">mkdir</span> -p <span class="s">~/bilal-os</span>
+<span class="cmd">cp</span> bilal-os-build.sh <span class="s">~/bilal-os/</span>
+<span class="cmd">cd</span> <span class="s">~/bilal-os</span>
+
+<span class="c"># منح صلاحية التنفيذ</span>
+<span class="cmd">chmod</span> +x bilal-os-build.sh
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="step-title">(اختياري) تخصيص الإعدادات</div>
+          <div class="step-desc">يمكنك تعديل المتغيرات في أعلى السكريبت قبل التشغيل</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">config</span>
+              <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+            </div>
+<pre>
+<span class="k">OS_NAME</span>=<span class="s">"Bilal OS"</span>       <span class="c"># اسم النظام</span>
+<span class="k">OS_VERSION</span>=<span class="s">"1.0"</span>         <span class="c"># رقم الإصدار</span>
+<span class="k">OS_CODENAME</span>=<span class="s">"Horizon"</span>   <span class="c"># اسم الإصدار</span>
+<span class="k">DEBIAN_SUITE</span>=<span class="s">"bookworm"</span> <span class="c"># إصدار ديبيان</span>
+<span class="k">ARCH</span>=<span class="s">"amd64"</span>             <span class="c"># المعمارية</span>
+<span class="k">TIMEZONE</span>=<span class="s">"Asia/Riyadh"</span>  <span class="c"># المنطقة الزمنية</span>
+<span class="k">LOCALE</span>=<span class="s">"ar_SA.UTF-8"</span>    <span class="c"># اللغة</span>
+<span class="k">USERNAME</span>=<span class="s">"bilal"</span>         <span class="c"># اسم المستخدم</span>
+<span class="k">PASSWORD</span>=<span class="s">"bilal123"</span>      <span class="c"># كلمة المرور</span>
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <div class="step-title">تشغيل البناء</div>
+          <div class="step-desc">شغّل السكريبت بصلاحيات root. سيقوم بكل شيء تلقائياً</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash</span>
+              <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+            </div>
+<pre>
+<span class="c"># تشغيل السكريبت (يستغرق 30-90 دقيقة)</span>
+<span class="cmd">sudo bash</span> bilal-os-build.sh
+
+<span class="c"># ستجد الـ ISO النهائي في:</span>
+<span class="c"># ./bilal-os-output/bilal-os-1.0-amd64.iso</span>
+</pre>
+          </div>
+
+          <div class="note note-info">
+            <span class="note-icon">ℹ️</span>
+            <span>سيقوم السكريبت بمراحل: bootstrap ← تهيئة النظام ← تخصيص Bilal OS ← SquashFS ← Bootloader ← بناء ISO ← التحقق</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="step">
+        <div class="step-line"></div>
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <div class="step-title">اختبار الـ ISO في QEMU</div>
+          <div class="step-desc">اختبر النظام في محاكي افتراضي قبل الكتابة على USB</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash</span>
+              <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+            </div>
+<pre>
+<span class="c"># تثبيت QEMU</span>
+<span class="cmd">sudo apt-get install</span> -y <span class="s">qemu-system-x86</span>
+
+<span class="c"># تشغيل Bilal OS في QEMU (BIOS mode)</span>
+<span class="cmd">qemu-system-x86_64</span> \
+  -m <span class="v">2G</span> \
+  -cdrom <span class="s">bilal-os-output/bilal-os-1.0-amd64.iso</span> \
+  -boot d \
+  -vga std
+
+<span class="c"># تشغيل UEFI mode (يحتاج OVMF)</span>
+<span class="cmd">sudo apt-get install</span> -y <span class="s">ovmf</span>
+<span class="cmd">qemu-system-x86_64</span> \
+  -m <span class="v">2G</span> \
+  -bios /usr/share/ovmf/OVMF.fd \
+  -cdrom <span class="s">bilal-os-output/bilal-os-1.0-amd64.iso</span> \
+  -boot d
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div class="step">
+        <div class="step-num">06</div>
+        <div class="step-body">
+          <div class="step-title">كتابة ISO على USB</div>
+          <div class="step-desc">كتابة الـ ISO على فلاشة USB لتشغيله على جهاز حقيقي</div>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">bash</span>
+              <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+            </div>
+<pre>
+<span class="c"># اعثر على اسم الـ USB (احذر من الاختيار الخاطئ!)</span>
+<span class="cmd">lsblk</span>
+
+<span class="c"># اكتب الـ ISO على الـ USB (مثلاً /dev/sdb)</span>
+<span class="cmd">sudo dd</span> \
+  if=<span class="s">bilal-os-output/bilal-os-1.0-amd64.iso</span> \
+  of=<span class="v">/dev/sdX</span> \
+  bs=<span class="v">4M</span> \
+  status=progress \
+  conv=fsync
+
+<span class="c"># أو استخدم balenaEtcher (أسهل للمبتدئين)</span>
+</pre>
+          </div>
+
+          <div class="note note-warn">
+            <span class="note-icon">⚠️</span>
+            <span>استبدل <code style="font-family:monospace;background:rgba(255,123,58,0.15);padding:2px 6px;border-radius:3px">/dev/sdX</code> باسم جهاز الـ USB الصحيح. سيمسح البيانات المخزنة عليه!</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PACKAGES ── -->
+  <div class="section">
+    <div class="section-title">الحزم المضمّنة</div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:12px;color:var(--glow)">🖥️ سطح المكتب</div>
+      <div class="pkg-grid">
+        <span class="pkg">xfce4</span>
+        <span class="pkg">xfce4-goodies</span>
+        <span class="pkg">lightdm</span>
+        <span class="pkg">xfce4-terminal</span>
+        <span class="pkg">xfce4-screenshooter</span>
+        <span class="pkg">xfce4-power-manager</span>
+        <span class="pkg">xfce4-notifyd</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:12px;color:var(--green)">📦 التطبيقات</div>
+      <div class="pkg-grid">
+        <span class="pkg" style="color:var(--green);border-color:rgba(34,212,120,0.3);background:rgba(34,212,120,0.06)">firefox-esr</span>
+        <span class="pkg" style="color:var(--green);border-color:rgba(34,212,120,0.3);background:rgba(34,212,120,0.06)">vlc</span>
+        <span class="pkg" style="color:var(--green);border-color:rgba(34,212,120,0.3);background:rgba(34,212,120,0.06)">thunar</span>
+        <span class="pkg" style="color:var(--green);border-color:rgba(34,212,120,0.3);background:rgba(34,212,120,0.06)">mousepad</span>
+        <span class="pkg" style="color:var(--green);border-color:rgba(34,212,120,0.3);background:rgba(34,212,120,0.06)">evince</span>
+        <span class="pkg" style="color:var(--green);border-color:rgba(34,212,120,0.3);background:rgba(34,212,120,0.06)">gparted</span>
+        <span class="pkg" style="color:var(--green);border-color:rgba(34,212,120,0.3);background:rgba(34,212,120,0.06)">file-roller</span>
+        <span class="pkg" style="color:var(--green);border-color:rgba(34,212,120,0.3);background:rgba(34,212,120,0.06)">ristretto</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px;color:var(--accent)">🔧 أدوات النظام</div>
+      <div class="pkg-grid">
+        <span class="pkg" style="color:var(--accent);border-color:rgba(255,123,58,0.3);background:rgba(255,123,58,0.06)">network-manager</span>
+        <span class="pkg" style="color:var(--accent);border-color:rgba(255,123,58,0.3);background:rgba(255,123,58,0.06)">pulseaudio</span>
+        <span class="pkg" style="color:var(--accent);border-color:rgba(255,123,58,0.3);background:rgba(255,123,58,0.06)">htop</span>
+        <span class="pkg" style="color:var(--accent);border-color:rgba(255,123,58,0.3);background:rgba(255,123,58,0.06)">neofetch</span>
+        <span class="pkg" style="color:var(--accent);border-color:rgba(255,123,58,0.3);background:rgba(255,123,58,0.06)">git</span>
+        <span class="pkg" style="color:var(--accent);border-color:rgba(255,123,58,0.3);background:rgba(255,123,58,0.06)">curl</span>
+        <span class="pkg" style="color:var(--accent);border-color:rgba(255,123,58,0.3);background:rgba(255,123,58,0.06)">ntfs-3g</span>
+        <span class="pkg" style="color:var(--accent);border-color:rgba(255,123,58,0.3);background:rgba(255,123,58,0.06)">firmware-linux</span>
+        <span class="pkg" style="color:var(--accent);border-color:rgba(255,123,58,0.3);background:rgba(255,123,58,0.06)">firmware-iwlwifi</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STRUCTURE ── -->
+  <div class="section">
+    <div class="section-title">هيكل البناء</div>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-lang">tree</span>
+        <div class="code-dots"><div class="code-dot dot-r"></div><div class="code-dot dot-y"></div><div class="code-dot dot-g"></div></div>
+      </div>
+<pre>
+bilal-os-build/
+├── <span class="k">chroot/</span>            <span class="c"># نظام الملفات الأساسي (debootstrap)</span>
+│   ├── etc/
+│   ├── usr/
+│   ├── home/bilal/
+│   └── boot/
+└── <span class="k">binary/</span>            <span class="c"># محتويات الـ ISO</span>
+    ├── live/
+    │   ├── <span class="s">filesystem.squashfs</span>  <span class="c"># النظام المضغوط</span>
+    │   ├── vmlinuz            <span class="c"># نواة لينيكس</span>
+    │   └── initrd.img         <span class="c"># initial ramdisk</span>
+    ├── boot/
+    │   ├── grub/
+    │   │   ├── <span class="s">grub.cfg</span>      <span class="c"># إعداد GRUB (UEFI)</span>
+    │   │   └── themes/bilalos/
+    │   └── efi.img            <span class="c"># قسم EFI</span>
+    └── isolinux/
+        ├── <span class="s">isolinux.bin</span>   <span class="c"># bootloader (BIOS)</span>
+        └── <span class="s">isolinux.cfg</span>   <span class="c"># إعداد ISOLINUX</span>
+
+bilal-os-output/
+├── <span class="v">bilal-os-1.0-amd64.iso</span>    <span class="c"># ← الملف النهائي</span>
+├── bilal-os-1.0-amd64.sha256
+└── bilal-os-1.0-amd64.md5
+</pre>
+    </div>
+  </div>
+
+  <div class="note note-ok">
+    <span class="note-icon">✅</span>
+    <span>الـ ISO النهائي يدعم الإقلاع من UEFI و BIOS معاً (Hybrid ISO). يمكن كتابته على USB أو DVD أو استخدامه في أي محاكي افتراضي.</span>
+  </div>
+
+</div>
+
+<footer>
+  BILAL OS · HORIZON EDITION · v1.0 · BUILT ON DEBIAN GNU/LINUX 12
+</footer>
+
+</body>
+</html>
