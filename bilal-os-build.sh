@@ -269,7 +269,9 @@ apt-get install -y --no-install-recommends \
     bash-completion curl wget git nano vim htop neofetch \
     sudo apt-transport-https ca-certificates gnupg \
     zip unzip p7zip-full ntfs-3g dosfstools os-prober \
-    firmware-linux-free
+    firmware-linux-free \
+    firmware-linux-nonfree firmware-iwlwifi \
+    firmware-realtek firmware-atheros || true
 
 # Create live user
 useradd -m -s /bin/bash -G sudo,audio,video,plugdev,netdev "${USERNAME}"
@@ -484,7 +486,7 @@ CLEAN
         -comp xz \
         -Xbcj x86 \
         -b 1M \
-        -e boot \
+        -e boot -e proc -e sys -e dev -e run \
         -noappend \
         || error "mksquashfs failed"
 
@@ -609,12 +611,18 @@ build_iso() {
         fat iso9660 part_gpt part_msdos normal boot linux \
         configfile loopback chain efifwsetup efi_gop \
         squash4 memdisk png gfxterm gfxterm_background \
-        gfxterm_menu test all_video loadenv exfat ext2
+        test all_video loadenv exfat ext2
 
     cp "$WORK_DIR/binary/boot/grub/grub.cfg" \
        "$efi_mnt/EFI/BOOT/"
     umount "$efi_mnt"
     rmdir "$efi_mnt"
+
+    # Locate isohdpfx.bin (path differs between distros)
+    local isohdpfx
+    isohdpfx=$(find /usr/lib/ISOLINUX /usr/lib/syslinux \
+                    -name isohdpfx.bin 2>/dev/null | head -1)
+    [[ -n "$isohdpfx" ]] || error "isohdpfx.bin not found — install isolinux"
 
     # Build the ISO with xorriso
     xorriso \
@@ -634,7 +642,7 @@ build_iso() {
         -e boot/efi.img \
         -no-emul-boot \
         -isohybrid-gpt-basdat \
-        -isohybrid-mbr /usr/lib/ISOLINUX/isohdpfx.bin \
+        -isohybrid-mbr "$isohdpfx" \
         -output "$iso_path" \
         "$WORK_DIR/binary" \
         || error "xorriso failed"
